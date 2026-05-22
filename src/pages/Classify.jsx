@@ -16,9 +16,11 @@ export default function Classify({ image, setClassification }) {
       return
     }
 
-    // 자동으로 AI 분류 실행
-    runClassification()
-  }, [image, navigate])
+    // 모델 로드 완료 후 AI 분류 실행
+    if (!loading) {
+      runClassification()
+    }
+  }, [image, navigate, loading])
 
   const runClassification = async () => {
     try {
@@ -35,6 +37,11 @@ export default function Classify({ image, setClassification }) {
   const handleSubmit = () => {
     if (!selectedClass) {
       alert('분류를 선택해주세요!')
+      return
+    }
+
+    if (!aiPrediction) {
+      alert('AI 분류가 완료되지 않았습니다. 잠시만 기다려주세요.')
       return
     }
 
