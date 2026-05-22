@@ -1,13 +1,17 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import NavBar from '../components/NavBar'
 
 export default function Success({ classification }) {
   const navigate = useNavigate()
+  const location = useLocation()
+
+  // location.state에서 classification 받기 (또는 props에서 받기)
+  const classData = location.state || classification
   const [fireworks, setFireworks] = useState([])
 
   useEffect(() => {
-    if (!classification) {
+    if (!classData) {
       navigate('/camera')
       return
     }
@@ -29,13 +33,13 @@ export default function Success({ classification }) {
     const timer = setInterval(generateFireworks, 2000)
 
     return () => clearInterval(timer)
-  }, [classification, navigate])
+  }, [classData, navigate])
 
-  if (!classification) {
+  if (!classData) {
     return null
   }
 
-  const isCorrect = classification.correct
+  const isCorrect = classData.correct
 
   return (
     <div className="container">
@@ -60,8 +64,8 @@ export default function Success({ classification }) {
 
         {!isCorrect && (
           <div>
-            <p>당신의 선택: <strong>{classification.userChoice}</strong></p>
-            <p>정답: <strong>{classification.aiPrediction.className}</strong></p>
+            <p>당신의 선택: <strong>{classData.userChoice}</strong></p>
+            <p>정답: <strong>{classData.aiPrediction.className}</strong></p>
             <p style={{ marginTop: '20px' }}>
               다음에는 더 잘 분류할 수 있을 거예요! 💪
             </p>

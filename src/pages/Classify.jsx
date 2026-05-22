@@ -44,12 +44,8 @@ export default function Classify({ image, setClassification }) {
       correct: selectedClass === aiPrediction.classId
     }
 
-    setClassification(classificationData)
-
-    // state 업데이트 후에 navigate 실행
-    setTimeout(() => {
-      navigate('/success')
-    }, 100)
+    // location.state로 데이터를 전달하며 navigate
+    navigate('/success', { state: classificationData })
   }
 
   if (!image) {
