@@ -28,15 +28,28 @@ export function useModel() {
           setLoading(false)
           return
         } catch (localErr) {
-          console.warn('⚠️ 로컬 모델 로드 실패, MobileNet으로 대체:', localErr.message)
+          console.warn('⚠️ 로컬 모델 로드 실패')
         }
 
-        // 더미 모델로 대체
+        // MobileNet v2 로드 (더 호환성 좋은 버전)
+        try {
+          console.log('📥 MobileNet v2 로드 중...')
+          const mobilenetUrl = 'https://tfhub.dev/google/tfjs-models/tfjs_models/mobilenet_v2_1.0_224/model.json'
+          const mobilenet = await tf.loadLayersModel(mobilenetUrl)
+          console.log('✅ MobileNet v2 로드 완료 (1000개 클래스 분류)')
+          setModel({ tfModel: mobilenet, ready: true, source: 'mobilenet' })
+          setLoading(false)
+          return
+        } catch (mobilenetErr) {
+          console.warn('⚠️ MobileNet 로드 실패:', mobilenetErr.message)
+        }
+
+        // 모두 실패하면 더미 모델 사용
+        console.log('💡 더미 모델로 대체합니다.')
         setModel({ tfModel: null, ready: true, isDummy: true })
         setLoading(false)
       } catch (err) {
-        console.log('💡 모델을 찾을 수 없어서 더미 모델로 대체합니다. (테스트 모드)')
-        // 모두 실패하면 더미 모델 사용 (테스트용)
+        console.error('모델 로드 중 오류:', err)
         setModel({ tfModel: null, ready: true, isDummy: true })
         setLoading(false)
       }
