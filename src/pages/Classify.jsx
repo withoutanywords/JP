@@ -1,0 +1,101 @@
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import NavBar from '../components/NavBar'
+import { useModel } from '../hooks/useModel'
+
+export default function Classify({ image, setClassification }) {
+  const navigate = useNavigate()
+  const { classify, WASTE_CLASSES, loading } = useModel()
+  const [selectedClass, setSelectedClass] = useState(null)
+  const [aiPrediction, setAiPrediction] = useState(null)
+  const [classifying, setClassifying] = useState(false)
+
+  useEffect(() => {
+    if (!image) {
+      navigate('/camera')
+      return
+    }
+
+    // 자동으로 AI 분류 실행
+    runClassification()
+  }, [image, navigate])
+
+  const runClassification = async () => {
+    try {
+      setClassifying(true)
+      const result = await classify(image.src)
+      setAiPrediction(result)
+    } catch (err) {
+      console.error('분류 실패:', err)
+    } finally {
+      setClassifying(false)
+    }
+  }
+
+  const handleSubmit = () => {
+    if (!selectedClass) {
+      alert('분류를 선택해주세요!')
+      return
+    }
+
+    setClassification({
+      userChoice: selectedClass,
+      aiPrediction: aiPrediction,
+      correct: selectedClass === aiPrediction.classId
+    })
+
+    navigate('/success')
+  }
+
+  if (!image) {
+    return null
+  }
+
+  return (
+    <div className="container">
+      <NavBar />
+      <div className="classify">
+        <img src={image.src} alt="선택한 이미지" className="preview-image" />
+
+        <div className="question">
+          이 친구는 어디로 가야 할까요? 🤔
+        </div>
+
+        {classifying ? (
+          <div className="loading">
+            <div className="spinner"></div>
+            <div className="spinner"></div>
+            <div className="spinner"></div>
+          </div>
+        ) : null}
+
+        {aiPrediction && (
+          <div className="ai-result">
+            🤖 AI의 예측: <strong>{aiPrediction.className}</strong>
+            <br />
+            신뢰도: {aiPrediction.confidence}%
+          </div>
+        )}
+
+        <div className="classification-buttons">
+          {WASTE_CLASSES.map((wasteClass) => (
+            <button
+              key={wasteClass.id}
+              className={`waste-button ${wasteClass.color} ${
+                selectedClass === wasteClass.id ? 'selected' : ''
+              }`}
+              onClick={() => setSelectedClass(wasteClass.id)}
+            >
+              <div className="emoji">{wasteClass.emoji}</div>
+              <div className="label">{wasteClass.name}</div>
+            </button>
+          ))}
+        </div>
+
+        <button className="submit-button" onClick={handleSubmit}>
+          다음으로 진행하기 ➡️
+        </button>
+      </div>
+    </div>
+  )
+}
