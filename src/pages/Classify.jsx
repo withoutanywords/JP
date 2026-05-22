@@ -38,13 +38,18 @@ export default function Classify({ image, setClassification }) {
       return
     }
 
-    setClassification({
+    const classificationData = {
       userChoice: selectedClass,
       aiPrediction: aiPrediction,
       correct: selectedClass === aiPrediction.classId
-    })
+    }
 
-    navigate('/success')
+    setClassification(classificationData)
+
+    // state 업데이트 후에 navigate 실행
+    setTimeout(() => {
+      navigate('/success')
+    }, 100)
   }
 
   if (!image) {
